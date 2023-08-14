@@ -10,13 +10,24 @@ namespace HashingSample
     {
         static void Main()
         {
+            var salt = "SomeSalt";
+
+            //Shopping cart parameter sample
             var parameters = new SortedDictionary<string, string>
             {
-                { "field1", "value 1" },
-                { "field2", "value 2" },
-                { "field3", "value 3" }
+                { "CartItems", "[{\"ACCOUNTNUMBER\": \"12345\", \"AMOUNT\": \"134.50\",\"DUEDATE\":\"2023/06/01\"},{\"ACCOUNTNUMBER\": \"34567\", \"AMOUNT\": \"25.00\",\"DUEDATE\":\"2023/06/01\"}]" }
             };
 
+            // standard parameters sample
+            /*
+            var parameters = new SortedDictionary<string, string>
+            {
+                {"Account","12345"},
+                {"Zip","90210"},
+                {"Amount", "134.50"},
+                {"DueDate", "2023/06/01"}
+            };
+            */
 
             var parametersAsString = new StringBuilder();
 
@@ -25,11 +36,36 @@ namespace HashingSample
                 parametersAsString.AppendFormat("{0}{1}", p.Key, HttpUtility.UrlEncode(p.Value));
             }
 
+            Console.WriteLine("***** string to hash *******");
+            Console.WriteLine(parametersAsString);
+            Console.WriteLine();
 
-            Console.WriteLine(HashString(parametersAsString.ToString(), "SomeSalt"));
+            Console.WriteLine("***** hash *******");
+            var hash = HashString(parametersAsString.ToString(), salt);
+            Console.WriteLine(hash);
+
+            Console.WriteLine();
+            Console.WriteLine("***** sample post request *******");
+            // html form post
+            var sb = new StringBuilder();
+            sb.AppendLine("<html>");
+            sb.AppendLine(@"<body onload='document.forms[""form""].submit()'>");
+            sb.AppendLine("<form name='form' action='[Replace with post url]' method='post'>");
+            foreach (var p in parameters)
+            {
+                sb.AppendLine($" <input type='hidden' name='{p.Key}' value='{HttpUtility.HtmlEncode(p.Value)}'>");
+            }
+            sb.AppendLine($" <input type='hidden' name='ID' value='{hash}'>");
+            sb.AppendLine("</form>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            Console.WriteLine(sb.ToString());
             Console.ReadLine();
 
-            //hash: roSjzyTSjTg7qpU/Ih1BwMsLxpuHz1mUIsPfZuk4NDA=
+            //shopping cart parameter hash: k5WxwK3C5b+thLlJY5YlzKI7+dWm4gySggsWzXhaYTE=
+
+            //standard parameters hash: O0pwVrgrSAqNzkLTsAgohqQVeO/Rj5PsEzcBnZB0rgE=
 
         }
 
